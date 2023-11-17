@@ -71,8 +71,6 @@ public class PlayerAnimation : MonoBehaviour
 ```
 Player Movements:
 ```C#
-//键盘ad键控制左右移动和人物翻转
-
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -280,6 +278,7 @@ public class GridController : MonoBehaviour
 }
 ```
 Puzzle Design:
+
 ![image](https://github.com/zhangxiangna/CC-Final-Project/assets/115575320/f40d4e38-2037-4aac-b1ea-5d2c06da7d20)
 ![image](https://github.com/zhangxiangna/CC-Final-Project/assets/115575320/2184d87c-f7fe-459c-98a8-84425a3fa734)
 
