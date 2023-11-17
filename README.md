@@ -39,21 +39,246 @@ Design in-game assets: scenarios, player characters, NPCs, and animations. Devel
 Set up the game project in Unity. Implement basic dialogue frames and character animations. Test initial animations and dialogue systems for functionality.
 
 ![image](https://github.com/zhangxiangna/CC-Final-Project/blob/main/IMG/6.png)
-![image](https://github.com/zhangxiangna/CC-Final-Project/blob/main/IMG/7.png)
-![image](https://github.com/zhangxiangna/CC-Final-Project/blob/main/IMG/8.png)
+Player Animations:
+
+```C#
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class PlayerAnimation : MonoBehaviour
+{
+    public Animator anim; 
+    private Rigidbody2D rb; 
+
+    private void Awake()
+    {
+        anim = GetComponent<Animator>();
+        rb = GetComponent<Rigidbody2D>();
+    }
+
+    private void Update()
+    {
+        SetAnimation();
+    }
+
+    public void SetAnimation()
+    {
+        anim.SetFloat("velocityX", Mathf.Abs(rb.velocity.x));
+    }
+}
+```
+Player Movements:
+```C#
+//键盘ad键控制左右移动和人物翻转
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class PlayerMovements : MonoBehaviour
+{
+public Rigidbody2D rb;
+public float speed;
+
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        rb=GetComponent<Rigidbody2D>();
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        float horizontalMove = Input.GetAxis("Horizontal");
+        float faceDir = (float)transform.localScale.x;
+        if(horizontalMove!=0)
+        {
+            rb.velocity = new Vector2(horizontalMove * speed * Time.deltaTime, rb. velocity.y);      
+                    
+            if(horizontalMove > 0){
+            faceDir = 1.6f;//1.6是当前GameObject.transform.scale.x
+            }
+            if(horizontalMove < 0){
+            faceDir = -1.6f;
+            }     
+            transform.localScale = new Vector3(faceDir,1.6f,1.6f); 
+        }
+    }
+}
+```
 ![image](https://github.com/zhangxiangna/CC-Final-Project/blob/main/IMG/9.png)
 
 ## Week14 (8/9/2023-14/9/2023): Developing the first chapter
 
 Creating the first chapter in unity, including character animation, scene switching, dialog introduction, and puzzle creation. One in particular I'd like to mention is the puzzle creation for a light-up game where I spent some time.
 ![image](https://github.com/zhangxiangna/CC-Final-Project/assets/115575320/8d0a065d-d490-4df7-b6e5-856d7ac6908a)
-![image](https://github.com/zhangxiangna/CC-Final-Project/assets/115575320/47b32235-6c1e-4015-b298-08494af504a9)
-![image](https://github.com/zhangxiangna/CC-Final-Project/assets/115575320/67b1e334-42de-4be7-9c6a-9df06b36abe5)
+```C#
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class PortalTrigg : MonoBehaviour
+{
+    public Animator portalAnimator; // 在 Inspector 中引用 Portal2 的 Animator
+    public Animator playerAnimator;
+    public Animator oldstudio2Animator;
+    public GameObject oldstudio2; // oldstudio2 物体
+    public GameObject portal2; // portal2 物体
+    public GameObject studio2_1; // studio2-1 物体
+
+    public GameObject q1end;
+
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+
+        if (other.gameObject.name == "Player2")
+        {
+            // 当 Player2 进入 Portal2 的 Collider 时，触发 NoShow 动画
+            portalAnimator.SetTrigger("NoS");
+            playerAnimator.SetTrigger("PlayerNoShow");
+
+            StartCoroutine(TriggerOldstudio2Animation());
+
+        }
+
+    }
+
+    IEnumerator TriggerOldstudio2Animation()
+    {
+        // 等待一秒
+        yield return new WaitForSeconds(1f);
+
+        // 触发 oldstudio2 的 NoShow 动画
+        oldstudio2Animator.SetTrigger("NoShow");
+    }
+
+    public void OnAnimationEnd()
+    {
+        oldstudio2.SetActive(false); // 禁用 oldstudio2
+        portal2.SetActive(false); // 禁用 portal2
+        studio2_1.SetActive(true); // 启用 studio2-1
+        q1end.SetActive (true);
+    }
+}
+```
 
 Here's the code for my light-up game design:
-![image](https://github.com/zhangxiangna/CC-Final-Project/assets/115575320/77415c5a-6d60-4057-834c-1dee4c6224ee)
-![image](https://github.com/zhangxiangna/CC-Final-Project/assets/115575320/99f58943-25ba-4926-8eb9-1e7eeead5a0e)
-![image](https://github.com/zhangxiangna/CC-Final-Project/assets/115575320/ac6dfe7a-220c-4cc8-8445-147748df126f)
+```C#
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class GridController : MonoBehaviour
+{
+    private bool[,] grid = new bool[5, 5]; // 存储方格状态的二维数组
+    public Sprite Bad;
+    public Sprite Good;
+    public bool isGameSuccessful = false;
+    void Start()
+    {
+        InitializeGrid(); // 初始化网格状态
+        UpdateGridVisuals(); // 更新网格的视觉表示
+    }
+
+    void Update()
+    {
+        if (Input.GetMouseButtonDown(0)) // 检测鼠标左键点击
+        {
+            RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
+            if (hit.collider != null)
+            {
+                // 点击到了一个方格，提取其坐标
+                string[] coordinates = hit.collider.gameObject.name.Split('.');
+                int x = int.Parse(coordinates[0]) - 1;
+                int y = int.Parse(coordinates[1]) - 1;
+
+                ToggleSquare(x, y); // 处理点击逻辑
+            }
+        }
+    }
+
+    void InitializeGrid()
+    {
+        // 设置所有方格为亮起状态
+        for (int i = 0; i < 5; i++)
+        {
+            for (int j = 0; j < 5; j++)
+            {
+                grid[i, j] = true;
+            }
+        }
+
+        // 设置特定方格为暗状态
+        grid[0, 0] = grid[0, 1] = grid[0, 3] = grid[0, 4] = false;
+        grid[2, 0] = grid[2, 1] = grid[2, 3] = grid[2, 4] = false;
+        grid[3, 4] = false;
+        grid[4, 0] = grid[4, 1] = false;
+    }
+
+    void ToggleSquare(int x, int y)
+    {
+        // 切换被点击方格的状态
+        grid[x, y] = !grid[x, y];
+
+        // 切换相邻方格的状态
+        ToggleAdjacentSquares(x, y);
+
+        // 更新网格的视觉表示
+        UpdateGridVisuals();
+
+        // 检查游戏是否获胜
+        CheckForWin();
+    }
+
+    void ToggleAdjacentSquares(int x, int y)
+    {
+        // 切换上方格的状态（如果存在）
+        if (x > 0) grid[x - 1, y] = !grid[x - 1, y];
+        // 切换下方格的状态（如果存在）
+        if (x < 4) grid[x + 1, y] = !grid[x + 1, y];
+        // 切换左方格的状态（如果存在）
+        if (y > 0) grid[x, y - 1] = !grid[x, y - 1];
+        // 切换右方格的状态（如果存在）
+        if (y < 4) grid[x, y + 1] = !grid[x, y + 1];
+    }
+
+    void UpdateGridVisuals()
+    {
+        // 遍历每个方格并根据grid数组的状态更新它们的视觉表示
+
+        for(int x = 0; x < 5; x++){
+
+            for(int y = 0; y < 5; y++){
+
+                GameObject square = GameObject.Find(x + 1 + "." + (y + 1));
+                if(square != null){
+
+                    SpriteRenderer sr = square.GetComponent<SpriteRenderer>();
+                    if(sr != null){
+
+                        sr.sprite = grid[x, y] ? Bad : Good;
+                    }
+                }
+            }
+        }
+    }
+
+    void CheckForWin()
+    {
+        // 检查是否所有方格都亮起
+        foreach (bool state in grid)
+        {
+            if (!state) return; // 如果发现一个暗的方格，提早结束函数
+        }
+        isGameSuccessful = true;
+        Debug.Log("游戏胜利！"); // 如果所有方格都亮起，游戏胜利
+    }
+}
+```
 Puzzle Design:
 ![image](https://github.com/zhangxiangna/CC-Final-Project/assets/115575320/f40d4e38-2037-4aac-b1ea-5d2c06da7d20)
 ![image](https://github.com/zhangxiangna/CC-Final-Project/assets/115575320/2184d87c-f7fe-459c-98a8-84425a3fa734)
@@ -79,15 +304,130 @@ Scenes:
 ![image](https://github.com/zhangxiangna/CC-Final-Project/assets/115575320/0e105785-3e27-4f33-923c-a698a7f7486c)
 ![image](https://github.com/zhangxiangna/CC-Final-Project/assets/115575320/4a0b94e3-0878-4e95-9051-d174f588dd66)
 Code:
-![image](https://github.com/zhangxiangna/CC-Final-Project/assets/115575320/69273a1e-4576-4254-80a0-911be5553a9b)
-![image](https://github.com/zhangxiangna/CC-Final-Project/assets/115575320/ae0ffd7f-0b95-4ae1-8a82-d051dc70a4d3)
+```C#
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using PixelCrushers.DialogueSystem;
+
+public class Automove : MonoBehaviour
+{
+    public GameObject eve;
+    private Animator eveAnimator;
+    private float targetX = -2f;
+    private float moveSpeed = 1f;
+
+    void Start()
+    {
+        // 假设eve最初在x=-8的位置
+        eve.transform.position = new Vector3(-8f, eve.transform.position.y, eve.transform.position.z);
+
+        // 获取Animator组件
+        eveAnimator = eve.GetComponent<Animator>();
+
+        // 开始移动和动画
+        StartCoroutine(MoveEve());
+    }
+
+    private IEnumerator MoveEve()
+    {
+        // 播放动画
+        eveAnimator.SetBool("IsWalking", true);
+
+        // 移动eve直到达到目标位置
+        while(eve.transform.position.x < targetX)
+        {
+            eve.transform.position = new Vector3(eve.transform.position.x + moveSpeed * Time.deltaTime, eve.transform.position.y, eve.transform.position.z);
+            yield return null;
+        }
+
+        // 停止动画
+        eveAnimator.SetBool("IsWalking", false);
+
+        yield return new WaitForSeconds(1f);
+
+        // 触发对话
+        StartDialogue();
+    
+    }
+
+    private void StartDialogue()
+    {
+        DialogueManager.StartConversation("Q2Start");
+
+}
+}
+```
 
 ## Week18-Week19(6/10/2023-19/10/2023): Developing the last chapter of the game
 
 This is the last chapter of the game in which there are no puzzle designs. There are some choices involved and two different endings.
+```C#
+using UnityEngine;
 
-![image](https://github.com/zhangxiangna/CC-Final-Project/assets/115575320/e2e2663a-7d3c-4f6d-9519-87d9ec6cc9fe)
-![image](https://github.com/zhangxiangna/CC-Final-Project/assets/115575320/e9d7ff44-af19-4ec4-84ec-061f7ddc9e3b)
+public class PortalController2 : MonoBehaviour
+{
+    public Animator studioAnimator; // 确保在 Inspector 中引用了 Studio 的 Animator
+    public Animator playerAnimator; // 确保在 Inspector 中引用了 Player 的 Animator
+
+    // 动画事件调用这个方法
+    public void OnPortalNoShowComplete()
+    {
+        // 触发Studio的NoShow动画
+        if (studioAnimator != null)
+        {
+            studioAnimator.SetTrigger("StudioNoShow");
+        }
+        else
+        {
+            Debug.LogError("Studio animator is not assigned!", this);
+        }
+
+        // 触发Player的NoShow动画
+        if (playerAnimator != null)
+        {
+            playerAnimator.SetTrigger("PlayerNoShow");
+        }
+        else
+        {
+            Debug.LogError("Player animator is not assigned!", this);
+        }
+    }
+}
+```
+
+```C#
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Itemcontrol : MonoBehaviour
+ {
+    public GameObject studio4;
+    public GameObject background;
+    public GameObject eve2;
+    public GameObject robot;
+
+    public void ChangeSceneState() {
+        // 禁用studio4
+        if (studio4 != null) {
+            studio4.SetActive(false);
+        }
+
+        // 启用background, eve2, 和 robot
+        if (background != null) {
+            background.SetActive(true);
+        }
+        if (eve2 != null) {
+            eve2.SetActive(true);
+        }
+        if (robot != null) {
+            robot.SetActive(true);
+        }
+    }
+}
+
+```
 ![image](https://github.com/zhangxiangna/CC-Final-Project/assets/115575320/9510eb73-e5da-4ea5-85dd-c0ebdc5a3852)
 ![image](https://github.com/zhangxiangna/CC-Final-Project/assets/115575320/f17c5a28-18f2-4a8c-95b0-1547dc1b454c)
 ![image](https://github.com/zhangxiangna/CC-Final-Project/assets/115575320/6b6abd9c-6cfb-43bc-b8ef-e5a23c08db3e)
