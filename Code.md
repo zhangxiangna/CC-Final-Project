@@ -1127,3 +1127,192 @@ public class portal4show : MonoBehaviour
 }
 ```
 
+```C#
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using PixelCrushers.DialogueSystem;
+
+public class DialogueTrigger : MonoBehaviour
+{
+
+    private bool hasTriggered = false;
+    private void OnMouseDown()
+    {
+        // 假设'youngman1'是您在Dialogue System中设置的对话的名字
+        if (!DialogueManager.IsConversationActive)
+        {
+            DialogueManager.StartConversation("quest3", transform);
+            hasTriggered = true;
+        }
+    }
+}
+
+```
+
+```C#
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class disable : MonoBehaviour
+{
+    public GameObject background; // 背景对象的引用
+    public GameObject robot; // 机器人对象的引用
+    public GameObject eve2;
+
+    void Start()
+    {
+        // 直接禁用背景对象
+        background.SetActive(false);
+
+        // 直接禁用机器人对象
+        robot.SetActive(false);
+
+        eve2.SetActive(false);
+    }
+}
+
+```
+
+```C#
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using PixelCrushers.DialogueSystem;
+
+public class evecon : MonoBehaviour
+{
+    private bool hasTriggered = false;
+    private void OnMouseDown()
+    {
+        // 假设'youngman1'是您在Dialogue System中设置的对话的名字
+        if (!DialogueManager.IsConversationActive)
+        {
+            DialogueManager.StartConversation("toeve", transform);
+            hasTriggered = true;
+        }
+    }
+}
+
+```
+
+```C#
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Itemcontrol : MonoBehaviour
+ {
+    public GameObject studio4;
+    public GameObject background;
+    public GameObject eve2;
+    public GameObject robot;
+
+    public void ChangeSceneState() {
+        // 禁用studio4
+        if (studio4 != null) {
+            studio4.SetActive(false);
+        }
+
+        // 启用background, eve2, 和 robot
+        if (background != null) {
+            background.SetActive(true);
+        }
+        if (eve2 != null) {
+            eve2.SetActive(true);
+        }
+        if (robot != null) {
+            robot.SetActive(true);
+        }
+    }
+}
+```
+
+```C#
+using UnityEngine;
+
+public class PlayerCollision : MonoBehaviour {
+    public Animator portalAnimator; // 引用portal7的Animator
+
+    private void OnTriggerEnter2D(Collider2D other) {
+        if (other.gameObject.name == "player4") {
+            Debug.Log("player4触发了portal7的触发器"); // 确认是player4触发了触发器
+            portalAnimator.SetTrigger("Activate2"); // 激活动画状态转换的触发器
+        }
+    }
+
+    // 通过动画事件调用的方法
+    public void DisablePortal() {
+        Debug.Log("动画结束，即将禁用portal7"); // 确认动画事件被触发
+        portalAnimator.gameObject.SetActive(false); // 禁用portal7对象
+    }
+}
+```
+
+```C#
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using PixelCrushers.DialogueSystem;
+
+
+public class robotcon : MonoBehaviour
+{
+    private bool hasTriggered = false;
+    private void OnMouseDown()
+    {
+        // 假设'youngman1'是您在Dialogue System中设置的对话的名字
+        if (!DialogueManager.IsConversationActive)
+        {
+            DialogueManager.StartConversation("robot", transform);
+            hasTriggered = true;
+        }
+    }
+}
+
+```
+
+```C#
+using UnityEngine;
+using System.Collections;
+
+public class screenani : MonoBehaviour
+
+{
+    public Animator animator; // 在Unity编辑器中分配Animator组件
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        // 开始协程，在游戏开始后3秒钟触发动画
+        StartCoroutine(TriggerAnimationAfterDelay(3f));
+    }
+
+    private IEnumerator TriggerAnimationAfterDelay(float delay)
+    {
+        // 等待指定的延迟时间
+        yield return new WaitForSeconds(delay);
+
+        // 触发名为 "ActivateShanshuo" 的触发器，用于启动 "shanshuo" 动画状态
+        animator.SetTrigger("ActivateShanshuo");
+    }
+}
+```
+```C#
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Showportal : MonoBehaviour
+ {
+    public GameObject portal7;
+
+    public void ActivatePortal() {
+        if (portal7 != null) {
+            portal7.SetActive(true);
+        }
+    }
+}
+```
+
